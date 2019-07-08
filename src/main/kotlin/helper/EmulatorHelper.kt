@@ -2,7 +2,10 @@ package helper.EmulatorHelper
 import main.kotlin.RipException
 import helper.ExternalProcess2.executeProcess2
 import helper.Helper
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.lang.Exception
 
 /**
@@ -140,22 +143,17 @@ fun takeAndPullScreenshot(id: String, folderName: String): String{
  * @throws Exception
  *             if any path is wrong
  */
-fun pullFile(_remotePath: String,_localPath: String){
-    //The kotlin params are val (not mutable) by default so it is necessary store them in new var variables
-    var remotePath = _remotePath
-    var localPath = _localPath
-    val remotePathEx = "/sdcard/sreen.png"
-    val localPathEx = "screenPull.png"
-
-    if(remotePath == "" || localPath == ""){
-        remotePath = remotePathEx
-        localPath = localPathEx
-    }
+fun pullFile(remotePath: String = "/sdcard/sreen.png",localPath: String = "screenPull.png"){
 
     val commands = listOf("adb", "pull", remotePath, localPath)
     executeProcess2(commands,"PULL FILE","File saved on PC", "File could not be pulled")
 }
 
+/**
+ * Calls the window manager (wm) and gets the density/resolution of the screen
+ *
+ * @return int Device density
+ */
 fun getDeviceResolution(): Int{
     var ans = 0
     try {
@@ -177,3 +175,111 @@ fun getDeviceResolution(): Int{
 
     return ans
 }
+
+fun isEventIdle(){
+    //The original code creates a new String[]{Here the same list of strings}
+    val pBB = ProcessBuilder("adb","shell","dumsys","window","-a","|","grep","mAppTransitionState")
+    var termino = false
+    var pss: Process
+    println("waiting for emulator's event idle state")
+    var reader: BufferedReader
+    var line: String
+    var resp = ""
+
+    while(!termino){
+        pss = pBB.start()
+        reader = BufferedReader(InputStreamReader(pss.inputStream))
+        //por cada linea en el reader las concatena con resp
+        reader.forEachLine { resp += it }
+
+        pss.waitFor()
+
+        if(resp.contains("IDLE")){
+            termino = true
+            Thread.sleep(500)
+            println("Emulator now is in event idle state")
+        }else{
+            Thread.sleep(2000)
+        }
+    }
+}
+
+/**
+ * Gets the current orientation of the accelerometer
+ *
+ * @return 0 if it's current orientation is portrait, 1 if landscape
+ */
+
+fun getCurrentOrientation(): Int{
+    return try {
+            val commands = listOf("adb", "shell","dumpsys", "input", "|", "grep",
+                "'SurfaceOrientation'")
+            val results = executeProcess2(commands, "GET CURRENT ORIENTATION", null, null)
+            var ans = results.first().split(":")
+
+            with(ans[1]) {
+                replace("\\s", "")
+                Integer.parseInt(this)
+            }
+        }catch (e: Exception){
+            println(e.message)
+            0
+        }
+}
+
+/**
+ * Simulates a tap in the screen.
+ *
+ * @param CoordX
+ *            X coordinate
+ * @param Coordy
+ *            Y coordinate
+ * @throws RipException
+ * @throws IOException
+ */
+
+fun tap(coordX: String = "168", coordY: String = "680"){
+    val commands = listOf("adb", "shell", "input", "tap", coordX, coordY)
+    executeProcess2(commands,"TAP", null, null)
+}
+
+/**
+* Simulates a long tap in the screen.
+*
+* @param CoordX
+*            and CoordY are the coordinates of the touch and milliseconds, the
+*            time of it.
+*/
+fun longTap(coordX: String = "168", coordY: String = "680", ms: String = "1000"){
+    val commands = listOf("adb", "shell", "input", "swipe", coordX, coordY, coordX, coordY, ms)
+    executeProcess2(commands, "LONG TAP", null, null)
+}
+
+/**
+ * Simulates a scroll
+ *
+ * @param coordX1
+ *            and coordY1 are the source coordinate
+ * @param coordX2
+ *            and coordY2 destination coordinate
+ * @param Milliseconds,
+ *            time of the touch.
+ */
+
+fun scroll(coordX1: String = "168", coordY1: String = "680",coordX2: String = "200", coordY2: String = "700", ms: String = "1000"){
+    val commands = listOf("adb", "shell", "input", "swipe", coordX1, coordY1, coordX2, coordY2, ms)
+    executeProcess2(commands, "SCROLL", null, null)
+}
+
+/**
+ * Simulates the effect of touching back soft button, return to the last
+ * activity. 4 is KEYCODE_BACK
+ * @throws RipException
+ * @throws IOException
+ */
+
+fun goBack(){
+    val commands = listOf("adb", "shell", "input", "keyevent", "4")
+    executeProcess2(commands, "GO BACK", null, null)
+}
+
