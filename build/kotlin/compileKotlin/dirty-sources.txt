@@ -1,0 +1,9 @@
+D:\stive\Documentos\RIP-Kotlin\src\main\kotlin\EmulatorHelper.kt
+D:\stive\Documentos\RIP-Kotlin\src\main\kotlin\ExternalProcess2.kt
+D:\stive\Documentos\RIP-Kotlin\src\main\kotlin\helper\EmulatorHelper.kt
+D:\stive\Documentos\RIP-Kotlin\src\main\kotlin\helper\ExternalProcess.kt
+D:\stive\Documentos\RIP-Kotlin\src\main\kotlin\helper\ExternalProcess2.kt
+D:\stive\Documentos\RIP-Kotlin\src\main\kotlin\helper\Helper.kt
+D:\stive\Documentos\RIP-Kotlin\src\main\kotlin\helper\ImageHelper.kt
+D:\stive\Documentos\RIP-Kotlin\src\main\kotlin\Helper.kt
+D:\stive\Documentos\RIP-Kotlin\src\main\kotlin\RipException.kt
