@@ -469,10 +469,67 @@ fun takeAndPullXMLSnapshot(id: String, folderName: String ): String{
 
 fun getCurrentViewHierarchy(): String{
     val commands = listOf("adb", "shell", "uiautomator", "dump")
-     val route = with(executeProcess2(commands,"TAKE XML SNAPSHOT", null, null ).let { it.first().split("\n").first() }){
+     val route = with(executeProcess2(commands,"TAKE XML SNAPSHOT", null, null ).first().split("\n").first()){
          split("UI hierchary dumped to: ").first().replace("(\\r)", "")
      }
     val readCommands = listOf("adb", "shell", "cat", route)
     val response = executeProcess2(readCommands, "READ XML SNAPSHOT", null, null)
     return  response.first()
+}
+/**
+ * Reads a remote file and returns its content.
+ *
+ * @param remoteRoute
+ *            Remote file route.
+ * @return File's content
+ */
+
+fun readRemoteFile(remoteRoute: String): String{
+    val commands = listOf("adb", "shell", "cat", remoteRoute)
+    return executeProcess2(commands,"READ REMOTE FILE", null, null )
+            .first()
+}
+/**
+ * Shows history of CPU usage with the name of the packages and the
+ * corresponding percentage
+ *
+ * @param packageName
+ *            is the name of the package that we want to know cpu usage
+ * @return usage % of the package
+ * @throws Exception
+ *             if there is no device or emulator or if the package does not
+ *             exist
+ */
+fun showCPUUsage(packageName: String): Double{
+    val commands = listOf("adb", "shell", "dumpsys", "cpuinfo", "|", "grep", packageName)
+    val answer = executeProcess2(commands,"SHOW CPU USAGE", null, null )
+    val ans =
+        if(answer.first().isNotEmpty()){
+                    with(answer.first().split("%").first().replace("\\s","")){
+                        if(contains("\\+")){
+                            replace("\\+", "")
+                        }else{this}
+                    }.toDouble()
+        }else{0.0}
+    println("CPU: $ans")
+    return ans
+}
+/**
+ * Shows history of memory usage with the name of the packages and the
+ * corresponding percentage
+ *
+ * @param packageName
+ *            is the name of the package that we want to know memory usage
+ * @return Memory usage in K.
+ * @throws Exception
+ *             if there is no device or emulator or if the package does not
+ *             exist
+ */
+fun showMemoryUsage(packageName: String = "com.example.lanabeji.dailyexpenses"): Double{
+    val commands = listOf("adb", "shell", "dumpsys", "meminfo", "|", "grep", packageName)
+    with(executeProcess2(commands, "SHOW MEMORY USAGE", null, null).first().split("\n")){
+        if(isNotEmpty()){
+
+        }
+    }
 }
