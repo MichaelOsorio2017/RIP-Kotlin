@@ -1,37 +1,43 @@
 package helper.EmulatorHelper
+import com.intellij.diff.comparison.expandWhitespaces
+import com.intellij.formatting.blocks.split
 import main.kotlin.RipException
 import helper.ExternalProcess2.executeProcess2
 import helper.Helper
 import java.io.BufferedReader
 import java.io.File
-import java.io.InputStream
 import java.io.InputStreamReader
 import java.lang.Exception
 
+//get the try codes and tries to do the action and throws the exception if something goes wrong
+inline fun simpleTryCatch(action: () -> Unit){
+    try{
+        action()
+    }catch (t: Throwable){
+        println("Caught something with simpleTryCatch method: ${t.message}")
+    }
+}
 /**
  * method to install an apk in a device
  */
 fun installAPK(pathAPK: String): Boolean {
-    return try {
-        val commands = listOf("adb","install","-r",pathAPK)
+    simpleTryCatch {
+        val commands = listOf("adb", "install", "-r", pathAPK)
         executeProcess2(commands, "INSTALLING APK", "Installation completed", "App could not be installed")
         Helper.logMessage("INSTALL APK", pathAPK, null)
-        true
-    }catch (e: Exception){
-        false
+        return true
     }
+    return false
 }
 
 /**
  * method to keep the device's screen unlocked
  */
 fun keepUnLock(){
-    try{
-        val commands = listOf("adb","shell", "svc", "power", "stayon", "true")
-        executeProcess2(commands, "KEEP UNLOCKED", null, null)
-    }catch (e: Exception){
-        println(e.message)
-    }
+   simpleTryCatch {
+       val commands = listOf("adb","shell", "svc", "power", "stayon", "true")
+       executeProcess2(commands, "KEEP UNLOCKED", null, null)
+   }
 }
 
 /**
@@ -156,7 +162,7 @@ fun pullFile(remotePath: String = "/sdcard/sreen.png",localPath: String = "scree
  */
 fun getDeviceResolution(): Int{
     var ans = 0
-    try {
+    simpleTryCatch {
         val commands = listOf("adb", "shell", "wm", "density")
         val results = executeProcess2(commands,"GET DEVICE RESOLUTION", null, null)
         val output = results.first()
@@ -169,10 +175,8 @@ fun getDeviceResolution(): Int{
         val def = String(fin)
         ans = Integer.parseInt(def)
         println("pulling file ans: $ans")
-    }catch (e: Exception){
-        println(e.message)
+        return ans
     }
-
     return ans
 }
 
@@ -211,20 +215,18 @@ fun isEventIdle(){
  */
 
 fun getCurrentOrientation(): Int{
-    return try {
-            val commands = listOf("adb", "shell","dumpsys", "input", "|", "grep",
-                "'SurfaceOrientation'")
-            val results = executeProcess2(commands, "GET CURRENT ORIENTATION", null, null)
-            var ans = results.first().split(":")
+    simpleTryCatch {
+        val commands = listOf("adb", "shell","dumpsys", "input", "|", "grep",
+            "'SurfaceOrientation'")
+        val results = executeProcess2(commands, "GET CURRENT ORIENTATION", null, null)
+        var ans = results.first().split(":")
 
-            with(ans[1]) {
-                replace("\\s", "")
-                Integer.parseInt(this)
-            }
-        }catch (e: Exception){
-            println(e.message)
-            0
+        with(ans[1]) {
+            replace("\\s", "")
+           return Integer.parseInt(this)
         }
+    }
+    return 0
 }
 
 /**
@@ -283,3 +285,194 @@ fun goBack(){
     executeProcess2(commands, "GO BACK", null, null)
 }
 
+/**
+ * Simulates the effect of touching recents soft button, shows recent apps. 187
+ * is KEYCODE_APP_SWITCH
+ */
+fun showRecents(){
+    simpleTryCatch {
+        println(" RECENTS \n [adb shell input keyevent 187] \n")
+        val commands = listOf("adb","shell", "input", "keyevent", "187")
+        executeProcess2(commands, "RECENT", null, null)
+    }
+}
+
+/**
+ * Simulates the effect of pressing the power button. 26 is KEYCODE_POWER
+ */
+fun turnOnScreen(){
+    val commands = listOf("adb", "shell", "input", "keyevent", "26")
+    executeProcess2(commands, "TURN ON/OFF SCREEN", null, null)
+}
+
+/**
+ * Lists available avds
+ *
+ * @throws Exception
+ *             if cannot list emulators.
+ */
+fun getEmulators(){
+    println(" LISTING EMULATORS \n [emulator -list-avds] ")
+    val commands = listOf("~/Library/Android/sdk/tools/emulator", "-list-avds")
+    executeProcess2(commands,"LIST EMULATORS", null, null )
+}
+
+/**
+ * Launch an existing emulator on the list
+ *
+ * @param emulator
+ *            Name of the emulator to launch
+ * @throws Exception
+ *             if the emulator does not exist
+ */
+fun launchEmulator(emulator: String = "Nexus_5_API_27"){
+    val commands = listOf("~/Library/Android/sdk/tools/emulator", "-avd", emulator, "-netdelay",
+        "none", "-netspeed", "full")
+    executeProcess2(commands,"LAUNCH EMULATOR", null, null)
+}
+
+/**
+ * Shows logcat and stops.
+ *
+ * @throws Exception
+ *             if something goes wrong
+ */
+fun showLogcat(){
+    val commands = listOf("adb", "shell", "logcat", "-d")
+    executeProcess2(commands,"GET LOGCAT", null, null )
+}
+
+/**
+ * Cleans logcat.
+ *
+ * @throws Exception
+ *             if something goes wrong
+ */
+fun clearLogcat(){
+    val commands = listOf("adb", "shell", "logcat", "-c")
+    executeProcess2(commands,"CLEAR LOGCAT", "LOGCAT Cleared", "Error clearing LOGCAT" )
+}
+
+/**
+ * Gets logcat and saves it in a file, then, pulled it into pc
+ *
+ * @param path
+ *            place where logcat will be saved inside phone
+ * @param localPath
+ *            place where logcat will be saved in pc
+ * @throws Exception
+ *             if file cannot be created or pulled
+ */
+fun saveLogcat(path: String = "/sdcard/outputLogcat.txt", localPath: String = "out.txt"){
+    createFile(path)
+    val commands = listOf("adb", "shell", "logcat", "-d", ">", path)
+    executeProcess2(commands,"SAVE LOGCAT", null, null )
+    pullFile(path,localPath)
+}
+
+/**
+ * Creates a file to save the logcat later
+ *
+ * @param path
+ *            the file path where you want to create the file
+ * @throws Exception
+ *             if permission is denied
+ */
+fun createFile(path: String = "/sdcard/outputLogcat.txt"){
+    val commands = listOf("adb", "shell", "touch", path)
+    executeProcess2(commands, "CREATE A FILE", "File created at: " + path, "File could not be created")
+}
+/**
+ * Turns off automatic rotation
+ *
+ * @throws RipException
+ * @throws IOException
+ */
+fun turnOffRotation(){
+    val commands = listOf("adb", "shell", "content", "insert", "--uri", "content://settings/system",
+        "--bind", "name:s:accelerometer_rotation", "--bind", "value:i:0")
+    executeProcess2(commands,"TURN OFF AUTOMATIC ROTATION", null, null)
+}
+
+/**
+ * Rotates to landscape. It is necessary turn off automatic rotation.
+ *
+ * @throws RipException
+ * @throws IOException
+ */
+fun rotateLandscape(){
+    turnOffRotation()
+    val commands = listOf("adb", "shell", "content", "insert", "--uri", "content://settings/system",
+        "--bind", "name:s:user_rotation", "--bind", "value:i:1")
+    executeProcess2(commands, "ROTATE TO LANDSCAPE", null, null )
+}
+
+ /**
+ * Rotates to portrait. It is necessary turn off automatic rotation.
+ *
+ * @throws RipException
+ * @throws IOException
+ */
+fun rotatePortrait(){
+     turnOffRotation()
+     val commands = listOf("adb", "shell", "content", "insert", "--uri", "content://settings/system",
+         "--bind", "name:s:user_rotation", "--bind", "value:i:0")
+     executeProcess2(commands,"ROTATE TO PORTRAIT", null, null)
+ }
+/**
+ * Open keyboard, the one that has letters
+ */
+fun showKeyboard(){
+    simpleTryCatch {
+        val commands = listOf("adb", "shell", "input", "keyevent", "78" )
+        executeProcess2(commands, "SHOW KEYBOARD", null, null)
+    }
+}
+
+/**
+ * Open a keyboard, the one that has numbers
+ */
+fun showNumKeyboard(){
+    val commands = listOf("adb", "shell", "input", "keyevent", "58")
+    executeProcess2(commands,  "SHOW NUMERIC KEYBOARD", null, null)
+}
+
+/**
+ * Writes text in a text field
+ *
+ * @param input
+ *            is the string that the users wants to write
+ */
+    //TODO guardar los valores ingresados en cada input field para luego usarlos en el replay
+fun enterInput(input: String){
+    val newString = input.replace(" ", "%s")
+    val commands = listOf("adb", "shell", "input", "text", newString)
+    executeProcess2(commands,"INPUT TEXT", null, null )
+}
+/**
+ * Takes a XML snapshot of the current activity
+ *
+ * @param destinationRoute
+ *            File destination route. If destinationRoute == null, the file
+ *            won't be saved
+ * @return XML file in String format
+ */
+fun takeAndPullXMLSnapshot(id: String, folderName: String ): String{
+    val commands = listOf("adb", "shell", "uiautomator", "dump")
+    val answer = executeProcess2(commands, "TAKE XML SNAPSHOT", null, null)
+    val temp = answer.first().split("\n")
+    val route = temp.first().split("UI hierchary dumped to: ").first().replace("(\\r)", "")
+    val local = "$folderName${File.separator}$id.xml"
+    pullFile(route, local )
+    return local
+}
+
+fun getCurrentViewHierarchy(): String{
+    val commands = listOf("adb", "shell", "uiautomator", "dump")
+     val route = with(executeProcess2(commands,"TAKE XML SNAPSHOT", null, null ).let { it.first().split("\n").first() }){
+         split("UI hierchary dumped to: ").first().replace("(\\r)", "")
+     }
+    val readCommands = listOf("adb", "shell", "cat", route)
+    val response = executeProcess2(readCommands, "READ XML SNAPSHOT", null, null)
+    return  response.first()
+}
