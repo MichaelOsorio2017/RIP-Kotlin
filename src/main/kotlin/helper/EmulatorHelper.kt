@@ -529,7 +529,33 @@ fun showMemoryUsage(packageName: String = "com.example.lanabeji.dailyexpenses"):
     val commands = listOf("adb", "shell", "dumpsys", "meminfo", "|", "grep", packageName)
     with(executeProcess2(commands, "SHOW MEMORY USAGE", null, null).first().split("\n")){
         if(isNotEmpty()){
+            val mem = first().toLowerCase().split(":").first().replace("k","").replace("b","")
+                .replace("\\s+", "").replace(",","").let { it.toDouble() }
+            println("MEM: $mem")
+           return mem
+        }
+    }
+    return 0.0
+}
 
+/**
+ * Returns the battery level of device or emulator
+ *
+ * @return Battery level percentage
+ * @throws Exception
+ *             if there is no device or emulator
+ */
+
+fun showBatteryLevel(): Int {
+    val commands = listOf("adb", "shell", "dumpsys", "battery", "|", "grep", "level")
+    val answer = executeProcess2(commands,"SHOW BATTERY LEVEL", null, null )
+    with(answer.first()){
+        val level = split(":")[1].replace("\\s+","")
+        return try{
+            level.toInt()
+        }catch (e: Exception){
+            println("ERROR PARSING BATTERY LEVEL: $level")
+            101
         }
     }
 }
