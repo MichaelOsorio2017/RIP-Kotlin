@@ -12,7 +12,7 @@ class Helper(){
         Helper()
     }){
         var out: BufferedWriter? = null
-        fun logMessage(command: String, parameters: String, errorMessage: String){
+        fun logMessage(command: String, parameters: String, errorMessage: String?){
             out?.use {
                 simpleTryCatch {
                     if (errorMessage != null && errorMessage == ""){
