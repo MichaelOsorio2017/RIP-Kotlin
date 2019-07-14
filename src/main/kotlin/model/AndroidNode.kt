@@ -80,20 +80,16 @@ data class AndroidNode(val state: State,var interacted: Boolean? = false, var cl
     fun isDomainAttribute():Boolean{
        return when(pClass){
             "android.widget.CheckBox" -> {
-                type = Domain.Type.BOOLEAN
-                true
+                type = Domain.Type.BOOLEAN; true
             }
             "android.widget.EditText" -> {
-                type = Domain.Type.STRING
-                true
+                type = Domain.Type.STRING; true
             }
             "android.widget.Button" -> {
-                type = Domain.Type.BUTTON
-                true
+                type = Domain.Type.BUTTON; true
             }
             "android.widget.RadioGroup" ->{
-                type = Domain.Type.LIST
-                true
+                type = Domain.Type.LIST; true
             }
             else -> false
         }
@@ -104,7 +100,9 @@ data class AndroidNode(val state: State,var interacted: Boolean? = false, var cl
             true
         }else{pClass!!.toLowerCase().contains("EditText")}
     }
-
+    fun isScrollable(): Boolean = scrollable
+    fun isClickeable(): Boolean = clickeable
+    fun isEnabled(): Boolean = enabled
     fun getCentral1X():Int = centralPoint!![0]
     fun getCentral1Y(): Int = centralPoint!![1]
 }

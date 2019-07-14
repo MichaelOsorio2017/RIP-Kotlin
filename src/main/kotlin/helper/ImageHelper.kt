@@ -32,11 +32,12 @@ fun compareImage(fileA: File, fileB: File): Float{
     return percentage
 }
 
-fun takeTransitionScreenshot(stateTransition: Transition, transitionId: Int): String{
-    println("$stateTransition")
-    val actual = stateTransition.origin
-    val screen = File(actual.screenShot)
-    if(TransitionType.getUserTypeTransition().contains(stateTransition.type)){
-
-    }else
-}
+//fun takeTransitionScreenshot(stateTransition: Transition, transitionId: Int): String{
+//    println("$stateTransition")
+//    val actual = stateTransition.origin
+//    val screen = File(actual.screenShot)
+//    if(TransitionType.getUserTypeTransition().contains(stateTransition.type)){
+//        val toHighlight =stateTransition.origin
+//        val p1 = toHighlight.poin
+//    }else
+//}

@@ -188,10 +188,7 @@ fun isEventIdle(){
     var termino = false
     var pss: Process
     println("waiting for emulator's event idle state")
-    var reader: BufferedReader
-    var line: String
     var resp = ""
-
     while(!termino){
         pss = pBB.start()
         BufferedReader(InputStreamReader(pss.inputStream)).use {
@@ -845,20 +842,15 @@ fun checkInputType(): Int{
     val answer = executeProcess2(commands, "CHECKING IF KEYBOARD IS SHOWN", null, null)
     with(answer.first().split("\n")){
         val number = first().substring(first().indexOf("inputType="),first().indexOf("ime")).replace("\\s+","")
-        if(number == "0" || number == null || number.equals(null)){
+        if(number == "0" || number == null || number == null){
             ret = 0
-        }else if(number.endsWith("1")){
-            ret = 1
-        }else if(number.endsWith("2")){
-            ret = 2
-        }else if(number.contains("1002") || number.contains("2002")){
+        }else if(number.endsWith("1")) ret = 1
+        else if(number.endsWith("2")) ret = 2
+        else if(number.contains("1002") || number.contains("2002"))
             ret = 3
-        }else if(number.endsWith("3")){
-            ret = 4
-        }else if(number.endsWith("4")){
-            ret = 5
-        }else{
-        }
+        else if(number.endsWith("3")) ret = 4
+        else if(number.endsWith("4")) ret = 5
+        else{}
     }
     return ret
 }
