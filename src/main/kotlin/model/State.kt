@@ -51,7 +51,6 @@ data class State(var id: Int? = null, var activityName: String? = null,
         }
 
         val allNodes = parsedXML?.getElementsByTagName("node")
-
         for (i in 0 .. allNodes!!.length){
             var currentNode = allNodes.item(i)
             var newAndroidNode = AndroidNode(this, currentNode)
@@ -64,15 +63,18 @@ data class State(var id: Int? = null, var activityName: String? = null,
                     possibleTransitions.push(if (isEditableText()){
                         Transition(this@State,type = GUI_INPUT_TEXT,originElement = this)
                     }else{
-                        Transition(this@State,type = SCROLL, originElement = this)
+                        Transition(this@State,type = GUI_CLICK_BUTTON, originElement = this)
                     })
                 }
+                if (isScrollable()) {
+                    if(pClass!!.contains("ViewPager")){
+                        possibleTransitions.push(Transition(this@State, type = TransitionType.SWIPE, originElement =  this))
+                    }else{
+                        possibleTransitions.push(Transition(this@State, type = TransitionType.SCROLL, originElement = this))
+                    }
+                }
             }
-            possibleTransitions.push(if (newAndroidNode.isScrollable()){
-                Transition(this, type =SWIPE, originElement = newAndroidNode )
-            }else{
-                Transition(this, type = SCROLL, originElement = newAndroidNode)
-            })
+
         }
     }
     private fun loadDomainModel(androidNode: AndroidNode){
@@ -82,6 +84,7 @@ data class State(var id: Int? = null, var activityName: String? = null,
         if(field == "")field ="BLANK"
         domainModel.add(Domain(name,type!!,field))
     }
+
     fun addError(error: HybridError){
         hybridErrors.add(error)
     }

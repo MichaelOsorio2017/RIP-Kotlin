@@ -148,12 +148,12 @@ fun getNodeImagesFromState(state: State): String{
     val screenshot = File(state.screenShot)
     val stateNodesFolder = File(screenshot.parent+File.separator+state.id+File.separator)
     stateNodesFolder.mkdir()
-    state.stateNodes.forEach { temp ->
-        ImageIO.read(screenshot).let {
-            val w = temp.point2!!.first() - temp.point1!!.first()
-            val h = temp.run { point2!![1] } - temp.run { point1!![1] }
- //           val subimage = it.getSubimage(temp.point1[0])
-        }
+    state.stateNodes.forEachIndexed{ i, it ->
+        val img = ImageIO.read(screenshot)
+        val w = it.point2!!.first() - it.point1!!.first()
+        val h = it.point2!!.component2() - it.point1!!.component2()
+        val subimage = img.getSubimage((it.point1 as IntArray).first() , (it.point1 as IntArray).component2(), if(2==0)30 else w, if(h==0)30 else h)
+        ImageIO.write(subimage, "png", File("${stateNodesFolder.path+File.separator+state.id}_$i.png"))
     }
-    return ""
+    return stateNodesFolder.path
 }
