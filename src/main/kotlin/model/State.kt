@@ -27,7 +27,7 @@ data class State(var id: Int? = null, var activityName: String? = null,
 
     fun popTransition(): Transition = possibleTransitions.pop()
 
-
+    fun addPossibleTransition(transition: Transition) = possibleTransitions.addLast(transition)
     fun addInboundTransition(pTransition: Transition) = inboundTransitions + pTransition
 
 

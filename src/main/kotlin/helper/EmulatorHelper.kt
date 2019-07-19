@@ -16,7 +16,10 @@ inline fun simpleTryCatch(action: () -> Unit){
     try{
         action()
     }catch (t: Throwable){
-        println("Caught something with simpleTryCatch method: ${t.message}")
+        if(t.cause == RipException::cause){
+            println("Execution closed the app")
+        }
+        println("${t.message}")
     }
 }
 /**

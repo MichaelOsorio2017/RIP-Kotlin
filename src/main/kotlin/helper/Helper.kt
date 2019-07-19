@@ -10,7 +10,7 @@ class Helper(){
     companion object: SingletonHolder<Helper,String>({ folderName ->
         simpleTryCatch { Helper.out = BufferedWriter(FileWriter("$folderName${File.separator}./log.log"))}
         Helper()
-    }){
+    }) {
         var out: BufferedWriter? = null
         fun logMessage(command: String, parameters: String, errorMessage: String?){
             out?.use {

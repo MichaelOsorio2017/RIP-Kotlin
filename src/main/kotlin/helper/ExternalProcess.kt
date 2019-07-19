@@ -1,4 +1,0 @@
-package helper
-
-class ExternalProcess {
-}
