@@ -2,12 +2,8 @@ package main.kotlin.main
 import helper.EmulatorHelper.*
 import main.kotlin.model.State
 import main.kotlin.model.Transition
-import org.bouncycastle.util.Strings
 import org.json.simple.JSONObject
 import org.json.simple.parser.JSONParser
-import java.io.File
-import java.io.FileReader
-import java.io.FileWriter
 import java.util.*
 import kotlin.collections.ArrayList
 import helper.Helper
@@ -19,14 +15,13 @@ import main.kotlin.hybridResources.JSConsoleReader
 import main.kotlin.model.AndroidNode
 import main.kotlin.model.TransitionType
 import me.tongfei.progressbar.ProgressBar
-import org.apache.xmlgraphics.ps.ImageEncodingHelper
-import org.mozilla.javascript.tools.shell.JSConsole
 import org.w3c.dom.Document
 import org.xml.sax.InputSource
-import java.io.StringReader
 import java.util.concurrent.TimeUnit
 import javax.xml.parsers.DocumentBuilderFactory
 import  main.kotlin.model.TransitionType.*
+import org.json.simple.JSONArray
+import java.io.*
 
 open class RIPBase(){
     companion object{
@@ -149,6 +144,202 @@ open class RIPBase(){
 
     var finishTime = 0L
 
+    private fun buildFiles(){
+        val resultFile = JSONObject()
+        resultFile.put(AMOUNT_STATES,statesTable?.size)
+        resultFile.put(AMOUNT_TRANSITIONS, transitions?.size)
+        val resultStates = JSONObject()
+        states?.forEach{
+            val state = JSONObject()
+            state.put("id", it.id)
+            state.put("activityName",it.activityName)
+            state.put("rawXML",it.rawXML)
+            state.put("screenShot", it.screenShot)
+            resultStates.put("${it.id}",state)
+        }
+        resultFile.put(STATES, resultStates)
+        val resultTransitions = JSONObject()
+        transitions?.forEachIndexed{i, tempTransition ->
+            val transition = JSONObject()
+            transition.put("stState", tempTransition.origin?.id)
+            transition.put("dsState", tempTransition.destination?.id)
+            transition.put("tranType", tempTransition.type.name)
+            transition.put("screenshot", tempTransition.screenShot)
+            val originNode = tempTransition.originElement
+            if(originNode != null){
+                val androidNode = JSONObject()
+                androidNode.put("resourceID", originNode.resourceID)
+                androidNode.put("name", originNode.name)
+                androidNode.put("text",originNode.text)
+                androidNode.put("xpath",originNode.xPath)
+                if(tempTransition.type == SCROLL || tempTransition.type == SWIPE){
+                    val p1 = originNode.point1
+                    val p2 = originNode.point2
+
+                    val tapX = p1!![0]
+                    val tapX2 = p2!![0]/3*2
+                    val tapY = p1[1]
+                    val tapY2 = p2[1]/3*2
+
+                    val tX = tapX.toString()
+                    val tX2 = tapX2.toString()
+                    val tY = tapY.toString()
+                    val tY2 = tapY2.toString()
+
+                    if(tempTransition.type == SCROLL){
+                        androidNode.put("action","[$tX2,$tY2][$tX2,$tY]")
+                    }else{
+                        androidNode.put("action","[$tX2,$tY2][$tX,$tY2]")
+                    }
+                }
+                androidNode.put("bounds", "[${originNode.point1!![0]},${originNode.point1!![1]}][" +
+                        "${originNode.point2!![0]},${originNode.point2!![1]}]")
+                transition.put("androidNode",androidNode)
+            }
+            resultTransitions.put(i.toString(),transition)
+        }
+        resultFile.put(TRANSITIONS, resultTransitions)
+        BufferedWriter(FileWriter("$folderName${File.separator}result.json")).use {
+            it.write(resultFile.toJSONString())
+        }
+        buildTreeJSON()
+        buildSequentialJSON()
+        buildMetaJSON()
+    }
+    private fun buildMetaJSON(){
+        val graph = JSONObject()
+        with(graph){
+            put("executionMethod", executionMode)
+            put("maxEvents", maxIterations.toString())
+            put("execEvents", executedIterations.toString())
+            put("maxTime",maxTime.toString())
+            put("elapsedTime",elapsedTime.toString())
+            put("startingDate",Date(startTime).toString())
+            put("finishDate",Date(System.currentTimeMillis()))
+            put("apk",packageName)
+            put("androidVersion", getAndroidVersion())
+            put("deviceResolution", getDeviceResolution())
+            put("currentOrientation",if(getCurrentOrientation()==0)"Portrait" else "Lanscape")
+            put("deviceDimensions", getScreenDimensions())
+            BufferedWriter(FileWriter("$folderName${File.separator}meta.json")).use {
+                it.write(toJSONString())
+            }
+        }
+    }
+    private fun buildSequentialJSON(){
+        val graph = JSONObject()
+        val resulStates = JSONArray()
+        states?.forEach {
+            val state = JSONObject()
+            with(state){
+                put("name",it.activityName)
+                put("image",File(it.screenShot).name)
+                put("battery",it.battery)
+                put("wifi",it.wifiStatus)
+                put("memory", it.memory)
+                put("cpu", it.cpu)
+                put("airplane", it.airplane)
+            }
+            resulStates.add(state)
+        }
+        graph.put("nodes", resulStates)
+        val resultTransitions = JSONArray()
+        transitions?.forEachIndexed{ i, tempTransition ->
+            val transition = JSONObject()
+            transition.put("id", i)
+            val fileName = if(tempTransition.screenShot == null) tempTransition.destination?.screenShot else tempTransition.screenShot
+            transition.put("image",  File(fileName!!).name)
+            resultTransitions.add(transition)
+        }
+        graph.put("links", resultTransitions)
+        BufferedWriter(FileWriter("$folderName${File.separator}sequential.json")).use {
+            it.write(graph.toJSONString())
+        }
+    }
+    private fun buildTreeJSON(){
+        val graph = JSONObject()
+        val resultStates = JSONArray()
+        states?.forEach {
+            val state = JSONObject()
+            with(state){
+                put("id",it.id)
+                put("name", "(${it.id}) ${it.activityName}")
+                val activityName = it.activityName
+                put("activityName", if(activityName!!.split("/").size > 1){
+                        activityName.split("/")[1]
+                    }else{
+                        activityName.split("/")[0]
+                    })
+                put("imageName", File(it.screenShot).name)
+                put("battery", it.battery)
+                put("wifi", it.wifiStatus)
+                put("memory", it.memory)
+                put("cpu", it.cpu)
+                put("airplane", it.airplane)
+                put("model", it.domainModel)
+                resultStates.add(this)
+            }
+        }
+        val state = JSONObject()
+        with(state){
+            put("id", states?.size)
+            put("name","(${states!!.size-1}) End of execution")
+            put("activityName", "End of eecution")
+            put("imageName", "N/A")
+            put("battery", "N/A")
+            put("wifi","N/A")
+            put("memory", "N/A")
+            put("cpu","N/A")
+            put("airplane","N/A")
+            resultStates.add(this)
+        }
+        graph.put("nodes", resultStates)
+        val resultTransitions = JSONArray()
+        transitions?.forEachIndexed{ i,tempTransition ->
+            val transition = JSONObject()
+            with(transition){
+                put("source",tempTransition.origin!!.id!!-1)
+                put("target", tempTransition.destination!!.id!!-1)
+                put("id",i)
+                put("tranType",tempTransition.type.name)
+                val temp = tempTransition
+                val fileName = if(temp.screenShot == null) temp.destination!!.screenShot else tempTransition.screenShot
+                put("imageName", File(fileName).name)
+                resultTransitions.add(transition)
+            }
+        }
+        val tempTransition = transitions!!.get(transitions?.size!!-1)
+        val finalTrans = Transition(origin = tempTransition.destination, type =  FINISH_EXECUTION)
+        val transition = JSONObject()
+        with(transition){
+            put("source", tempTransition.destination!!.id!!-1)
+            put("target", states!!.size)
+            put("id",transition.size)
+            put("tranType", FINISH_EXECUTION.name)
+            put("imageName", takeTransitionScreenshot(finalTrans, transition.size))
+            resultTransitions.add(transition)
+        }
+        graph.put("links",resultTransitions)
+        BufferedWriter(FileWriter("$folderName${File.separator}tree.json")).use {
+            it.write(graph.toJSONString())
+        }
+    }
+
+    fun compareScreenShotWithExisting(screenShot: String):State?{
+        val existing = File(screenShot)
+        for(i in states?.size?.downTo(0)?: 0..0){
+            val state = states?.get(i)
+            with(compareImage(File(state?.screenShot),existing)){
+                println("$this ${state?.id}")
+                if( this >= 97.5){
+                    println("Same!")
+                    return state
+                }
+            }
+        }
+        return null
+    }
+
     constructor(configFilePath: String): this(){
         printRIPInitialMessage()
         this.configFilePath = configFilePath
@@ -200,28 +391,12 @@ open class RIPBase(){
         initialState.id = sequentialNumber
 
         explore(initialState, initialTransition)
-        //TODO Implementar Build Files
-        //buildFiles()
+        buildFiles()
         println("EXPLORATION FINISHED, ${statesTable?.size?:"NO states"} states discovered, $executedIterations events executed, in $elapsedTime minutes")
         jsConsoleReader?.kill()
     }
 
-    private fun compareScreenShotWithExisting(screenShot: String):State?{
-        val existing = File(screenShot)
-        for(i in states?.size?.downTo(0)?: 0..0){
-            val state = states?.get(i)
-            with(compareImage(File(state?.screenShot),existing)){
-                println("$this ${state?.id}")
-                if( this >= 97.5){
-                    println("Same!")
-                    return state
-                }
-            }
-        }
-        return null
-    }
-
-    fun enterInput(node: AndroidNode): Int{
+    private fun enterInput(node: AndroidNode): Int{
         var type = 0
         enterInput(checkInputType().let {
             type = it
@@ -236,7 +411,7 @@ open class RIPBase(){
     }
 
     fun executeTransition(transition: Transition): TransitionType?{
-        var origin: AndroidNode?
+        val origin: AndroidNode?
         return when(transition.type){
            GUI_CLICK_BUTTON ->{
                origin = transition.originElement
@@ -293,7 +468,7 @@ open class RIPBase(){
         }
     }
 
-    fun explore(previousState : State, executedTransition: Transition){
+    open fun explore(previousState : State, executedTransition: Transition){
         println("NEW STATE EXPLORATION STARTED")
         currentState = State(hybrid = hybridApp, contextualChanges = contextualExploration)
         simpleTryCatch {
@@ -372,12 +547,12 @@ open class RIPBase(){
         }
     }
 
-    private fun findStateGraph(pState: State): State? = statesTable?.get(pState.rawXML)
+    fun findStateGraph(pState: State): State? = statesTable?.get(pState.rawXML)
 
-    private fun ifKeyboardHideKeyboard(){
+    fun ifKeyboardHideKeyboard(){
         if(isKeyBoardOpen()) goBack()
     }
-    private fun isRippingOutSideApp(parsedXML: Document): Boolean{
+    fun isRippingOutSideApp(parsedXML: Document): Boolean{
         val currentPackage = parsedXML.getElementsByTagName("node").item(0).attributes.getNamedItem("package").nodeValue
         if(pacName == ""){
             pacName = currentPackage
@@ -393,7 +568,7 @@ open class RIPBase(){
         return false
     }
 
-    private fun loadXMLFromString(xml: String): Document{
+    fun loadXMLFromString(xml: String): Document{
         val builder = DocumentBuilderFactory.newInstance().run { newDocumentBuilder() }
         val is_ = InputSource(StringReader(xml))
         return builder.parse(is_)
@@ -420,7 +595,7 @@ open class RIPBase(){
         return obj
     }
 
-    fun preProcess(params2: JSONObject){
+    open fun preProcess(params2: JSONObject){
 
     }
     private fun printRIPInitialMessage(){
@@ -469,4 +644,5 @@ open class RIPBase(){
         elapsedTime = System.currentTimeMillis().run { ((this-startTime)/60000).toInt()}
         return (elapsedTime<maxTime && (maxIterations-executedIterations)>0)
     }
+
 }

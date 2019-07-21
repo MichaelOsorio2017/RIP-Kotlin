@@ -3,11 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="e40fb042-d66e-4288-9fee-3a68ddb91e33" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/helper/EmulatorHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/helper/EmulatorHelper.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/helper/ExternalProcess.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/helper/Helper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/helper/Helper.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/model/State.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/model/State.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/model/Transition.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/model/Transition.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/main/RIPBase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/main/RIPBase.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/main/RIPRR.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/main/RIPRR.kt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -33,11 +30,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/kotlin/hybridResources/JSConsoleReader.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
+            <state relative-caret-position="85">
               <caret line="8" selection-start-line="8" selection-end-line="8" />
-              <folding>
-                <element signature="e#38#176#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -45,8 +39,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/kotlin/model/State.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="30" column="4" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
+            <state relative-caret-position="215">
+              <caret line="93" column="8" selection-start-line="93" selection-start-column="8" selection-end-line="93" selection-end-column="8" />
               <folding>
                 <element signature="e#27#249#0" expanded="true" />
               </folding>
@@ -54,11 +48,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/kotlin/main/RIPRR.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="3" column="61" selection-start-line="3" selection-start-column="61" selection-end-line="3" selection-end-column="61" />
+            <state relative-caret-position="531">
+              <caret line="188" column="1" lean-forward="true" selection-start-line="188" selection-start-column="1" selection-end-line="188" selection-end-column="1" />
+              <folding>
+                <element signature="e#26#476#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -75,13 +72,13 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/kotlin/main/RIPBase.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="290">
-              <caret line="203" column="10" selection-start-line="203" selection-start-column="10" selection-end-line="203" selection-end-column="10" />
+            <state relative-caret-position="360">
+              <caret line="551" column="4" selection-start-line="551" selection-start-column="4" selection-end-line="551" selection-end-column="4" />
               <folding>
-                <element signature="e#25#1007#0" expanded="true" />
+                <element signature="e#25#980#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -90,7 +87,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/kotlin/helper/EmulatorHelper.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="266">
+            <state relative-caret-position="3961">
               <caret line="243" column="4" selection-start-line="243" selection-start-column="4" selection-end-line="243" selection-end-column="4" />
               <folding>
                 <element signature="e#30#370#0" expanded="true" />
@@ -127,6 +124,7 @@
       <find>val</find>
       <find>json</find>
       <find>sequentia</find>
+      <find>load</find>
     </findStrings>
     <replaceStrings>
       <replace>var</replace>
@@ -162,18 +160,18 @@
         <option value="$PROJECT_DIR$/src/main/kotlin/helper/ImageHelper.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/helper/Helper.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/main/RIPBase.java" />
-        <option value="$PROJECT_DIR$/src/main/kotlin/main/RIPRR.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/model/Transition.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/hybridResources/JSConsoleReader.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/helper/EmulatorHelper.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/model/State.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/main/RIPBase.kt" />
+        <option value="$PROJECT_DIR$/src/main/kotlin/main/RIPRR.kt" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="952" />
-    <option name="width" value="977" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-8" />
+    <option name="width" value="978" />
     <option name="height" value="1038" />
   </component>
   <component name="ProjectLevelVcsManager">
@@ -183,78 +181,7 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="RIP-Kotlin" type="b2602c69:ProjectViewProjectNode" />
-              <item name="RIP-Kotlin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="RIP-Kotlin" type="b2602c69:ProjectViewProjectNode" />
-              <item name="RIP-Kotlin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="RIP-Kotlin" type="b2602c69:ProjectViewProjectNode" />
-              <item name="RIP-Kotlin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="RIP-Kotlin" type="b2602c69:ProjectViewProjectNode" />
-              <item name="RIP-Kotlin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="RIP-Kotlin" type="b2602c69:ProjectViewProjectNode" />
-              <item name="RIP-Kotlin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="RIP-Kotlin" type="b2602c69:ProjectViewProjectNode" />
-              <item name="RIP-Kotlin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="helper" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="RIP-Kotlin" type="b2602c69:ProjectViewProjectNode" />
-              <item name="RIP-Kotlin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="hybridResources" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="RIP-Kotlin" type="b2602c69:ProjectViewProjectNode" />
-              <item name="RIP-Kotlin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="RIP-Kotlin" type="b2602c69:ProjectViewProjectNode" />
-              <item name="RIP-Kotlin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="model" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
-    </panes>
+    <panes />
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -342,7 +269,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="762" y="0" width="781" height="830" extended-state="0" />
+    <frame x="758" y="0" width="784" height="830" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.43550625" />
@@ -660,6 +587,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/hybridResources/JSConsoleReader.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="8" selection-start-line="8" selection-end-line="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/helper/EmulatorHelper.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3961">
+          <caret line="243" column="4" selection-start-line="243" selection-start-column="4" selection-end-line="243" selection-end-column="4" />
+          <folding>
+            <element signature="e#30#370#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/kotlin/model/Transition.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
@@ -667,20 +611,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/hybridResources/JSConsoleReader.kt">
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/model/State.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" selection-start-line="8" selection-end-line="8" />
+        <state relative-caret-position="215">
+          <caret line="93" column="8" selection-start-line="93" selection-start-column="8" selection-end-line="93" selection-end-column="8" />
           <folding>
-            <element signature="e#38#176#0" expanded="true" />
+            <element signature="e#27#249#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/main/RIPRR.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="61" selection-start-line="3" selection-start-column="61" selection-end-line="3" selection-end-column="61" />
         </state>
       </provider>
     </entry>
@@ -694,32 +631,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/model/State.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="30" column="4" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
-          <folding>
-            <element signature="e#27#249#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/helper/EmulatorHelper.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="243" column="4" selection-start-line="243" selection-start-column="4" selection-end-line="243" selection-end-column="4" />
-          <folding>
-            <element signature="e#30#370#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/kotlin/main/RIPBase.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="290">
-          <caret line="203" column="10" selection-start-line="203" selection-start-column="10" selection-end-line="203" selection-end-column="10" />
+        <state relative-caret-position="360">
+          <caret line="551" column="4" selection-start-line="551" selection-start-column="4" selection-end-line="551" selection-end-column="4" />
           <folding>
-            <element signature="e#25#1007#0" expanded="true" />
+            <element signature="e#25#980#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/main/RIPRR.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="531">
+          <caret line="188" column="1" lean-forward="true" selection-start-line="188" selection-start-column="1" selection-end-line="188" selection-end-column="1" />
+          <folding>
+            <element signature="e#26#476#0" expanded="true" />
           </folding>
         </state>
       </provider>
