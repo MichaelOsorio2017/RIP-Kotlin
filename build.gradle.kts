@@ -11,6 +11,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -42,4 +43,24 @@ tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml
 }
 tasks.withType<KotlinCompile>{
     kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.register<Jar>("baseRip"){
+    manifest{
+        attributes["Main-Class"] = "main.RIPBase"
+    }
+    baseName = "RIP"
+    this.apply {
+       
+    }
+}
+
+tasks.register<Jar>("riprr"){
+    manifest{
+        attributes["Main-Class"] = "main.RIPRR"
+    }
+    baseName = "RIPRR"
+//    from(configurations.compile.fileCollection().forEach{
+//        zipTree(it)
+//    })
 }

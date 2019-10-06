@@ -1,5 +1,4 @@
 package helper.EmulatorHelper
-import com.intellij.formatting.blocks.split
 import main.kotlin.RipException
 import helper.ExternalProcess2.executeProcess2
 import helper.Helper
@@ -67,7 +66,7 @@ fun verifyADB(): String{
  * @throws Exception
  *             if there is no package with that name
  */
-fun unistallAPK(packageName: String){
+fun uninstallAPK(packageName: String){
     val commands =  listOf("adb", "uninstall", packageName)
     executeProcess2(commands, "UNINSTALL APK", "Uninstall complete", "APK could not be uninstalled")
     println("UNINSTALL COMPLETE")
@@ -116,7 +115,7 @@ fun stopApp(packageName: String){
  * @throws Exception
  *             if something in the process fails, like app does not exist
  */
-fun crearData(packageName: String){
+fun clearData(packageName: String){
     val commands = listOf("adb", "shell", "pm", "clear", packageName)
     executeProcess2(commands, "CLEAR DATA", "Data cleared", "Data could not be cleared")
 
@@ -564,7 +563,7 @@ fun showBatteryLevel(): Int {
     with(answer.first()){
         val level = split(":")[1].replace("\\s+","")
         return try{
-            level.toInt()
+            level.trim().toInt()
         }catch (e: Exception){
             println("ERROR PARSING BATTERY LEVEL: $level")
             101
@@ -776,7 +775,7 @@ fun getScreenSize(): IntArray{
 fun getScreenDimensions():String{
     val commands = listOf("adb", "shell", "wm", "size")
     val answer = executeProcess2(commands, "CHEKING DEVICE DIMENSIONS", null, null)
-    return answer.first().split(":").first().replace("\\s+","")
+    return answer.first().split(":").component2().replace("\\s+","")
 }
 /**
  * Checks if it is at Home
@@ -1051,4 +1050,8 @@ fun readWebViewConsole(){
         }
         proc.waitFor()
     }
+}
+
+fun moveToEndInput(){
+    listOf("adb","shell","input","keyevent","KEYCODE_MOVE_END").run{executeProcess2(this,"MOVE TO END OF INPUT FIELD",null, null) }
 }

@@ -68,6 +68,7 @@ open class RIPBase(){
 
     var sequentialNumber = -1
         get() = ++field
+
     /**
      * Main activity of the application
      */
@@ -80,7 +81,7 @@ open class RIPBase(){
     var states: ArrayList<State>? = null
 
     var transitions: ArrayList<Transition>? =null
-
+    var executedTransitions: ArrayList<Transition>? = null
     /*
 	 * Device information
 	 */
@@ -148,6 +149,8 @@ open class RIPBase(){
         val resultFile = JSONObject()
         resultFile.put(AMOUNT_STATES,statesTable?.size)
         resultFile.put(AMOUNT_TRANSITIONS, transitions?.size)
+
+        //states
         val resultStates = JSONObject()
         states?.forEach{
             val state = JSONObject()
@@ -158,13 +161,19 @@ open class RIPBase(){
             resultStates.put("${it.id}",state)
         }
         resultFile.put(STATES, resultStates)
+
+        //Transitions
         val resultTransitions = JSONObject()
         transitions?.forEachIndexed{i, tempTransition ->
             val transition = JSONObject()
             transition.put("stState", tempTransition.origin?.id)
             transition.put("dsState", tempTransition.destination?.id)
             transition.put("tranType", tempTransition.type.name)
+            transition.put("outside",tempTransition.leavesAppCore)
             transition.put("screenshot", tempTransition.screenShot)
+            if(tempTransition.type == GUI_INPUT_TEXT){
+                transition.put("inputString",tempTransition.inputString)
+            }
             val originNode = tempTransition.originElement
             if(originNode != null){
                 val androidNode = JSONObject()
@@ -196,9 +205,20 @@ open class RIPBase(){
                         "${originNode.point2!![0]},${originNode.point2!![1]}]")
                 transition.put("androidNode",androidNode)
             }
-            resultTransitions.put(i.toString(),transition)
+            resultTransitions.put("$i",transition)
         }
         resultFile.put(TRANSITIONS, resultTransitions)
+        //All transitions
+        val allTransitions = JSONObject()
+        executedTransitions?.forEachIndexed{ i, tempTransition ->
+            val transition = JSONObject()
+            transition.put("stState", tempTransition.origin)
+            transition.put("tranType", tempTransition.type.name)
+            transition.put("outside", tempTransition.leavesAppCore)
+            transition.put("valTrans",tempTransition.valuableTransNumber)
+            allTransitions.put("$i",transition)
+        }
+        resultFile.put("allTransitions", allTransitions)
         BufferedWriter(FileWriter("$folderName${File.separator}result.json")).use {
             it.write(resultFile.toJSONString())
         }
@@ -228,7 +248,7 @@ open class RIPBase(){
     }
     private fun buildSequentialJSON(){
         val graph = JSONObject()
-        val resulStates = JSONArray()
+        val resultStates = JSONArray()
         states?.forEach {
             val state = JSONObject()
             with(state){
@@ -240,9 +260,10 @@ open class RIPBase(){
                 put("cpu", it.cpu)
                 put("airplane", it.airplane)
             }
-            resulStates.add(state)
+            resultStates.add(state)
         }
-        graph.put("nodes", resulStates)
+        graph.put("nodes", resultStates)
+
         val resultTransitions = JSONArray()
         transitions?.forEachIndexed{ i, tempTransition ->
             val transition = JSONObject()
@@ -259,32 +280,31 @@ open class RIPBase(){
     private fun buildTreeJSON(){
         val graph = JSONObject()
         val resultStates = JSONArray()
-        states?.forEach {
+        states?.forEach {tempState ->
             val state = JSONObject()
             with(state){
-                put("id",it.id)
-                put("name", "(${it.id}) ${it.activityName}")
-                val activityName = it.activityName
+                put("id",tempState.id)
+                put("name", "(${tempState.id}) ${tempState.activityName}")
+                val activityName = tempState.activityName
                 put("activityName", if(activityName!!.split("/").size > 1){
                         activityName.split("/")[1]
                     }else{
                         activityName.split("/")[0]
                     })
-                put("imageName", File(it.screenShot).name)
-                put("battery", it.battery)
-                put("wifi", it.wifiStatus)
-                put("memory", it.memory)
-                put("cpu", it.cpu)
-                put("airplane", it.airplane)
-                put("model", it.domainModel)
+                put("imageName", File(tempState.screenShot).name)
+                put("battery", tempState.battery)
+                put("wifi", tempState.wifiStatus)
+                put("memory", tempState.memory)
+                put("cpu", tempState.cpu)
+                put("airplane", tempState.airplane)
+                put("model", tempState.domainModel)
                 resultStates.add(this)
             }
         }
-        val state = JSONObject()
-        with(state){
+        with(JSONObject()){
             put("id", states?.size)
             put("name","(${states!!.size-1}) End of execution")
-            put("activityName", "End of eecution")
+            put("activityName", "End of execution")
             put("imageName", "N/A")
             put("battery", "N/A")
             put("wifi","N/A")
@@ -294,10 +314,10 @@ open class RIPBase(){
             resultStates.add(this)
         }
         graph.put("nodes", resultStates)
+
         val resultTransitions = JSONArray()
         transitions?.forEachIndexed{ i,tempTransition ->
-            val transition = JSONObject()
-            with(transition){
+            with(JSONObject()){
                 put("source",tempTransition.origin!!.id!!-1)
                 put("target", tempTransition.destination!!.id!!-1)
                 put("id",i)
@@ -305,7 +325,7 @@ open class RIPBase(){
                 val temp = tempTransition
                 val fileName = if(temp.screenShot == null) temp.destination!!.screenShot else tempTransition.screenShot
                 put("imageName", File(fileName).name)
-                resultTransitions.add(transition)
+                resultTransitions.add(this)
             }
         }
         val tempTransition = transitions!!.get(transitions?.size!!-1)
@@ -350,6 +370,7 @@ open class RIPBase(){
         statesTable = Hashtable()
         states = ArrayList()
         transitions = ArrayList()
+        executedTransitions = ArrayList()
         File(folderName).mkdir()
 
         Helper.getInstance(folderName)
@@ -386,18 +407,24 @@ open class RIPBase(){
         }
 
         preProcess(params!!)
-        val initialTransition = Transition(null, type = TransitionType.FIRST_INTERACTION)
+        val initialTransition = Transition(null, type = FIRST_INTERACTION)
         val initialState = State(hybrid = hybridApp, contextualChanges =  contextualExploration)
         initialState.id = sequentialNumber
-
         explore(initialState, initialTransition)
+
         buildFiles()
+        simpleTryCatch {
+            clearData(packageName)
+            uninstallAPK(packageName)
+        }
+
         println("EXPLORATION FINISHED, ${statesTable?.size?:"NO states"} states discovered, $executedIterations events executed, in $elapsedTime minutes")
         jsConsoleReader?.kill()
     }
 
     private fun enterInput(node: AndroidNode): Int{
         var type = 0
+        moveToEndInput()
         enterInput(checkInputType().let {
             type = it
             if(it == 1){
@@ -415,17 +442,17 @@ open class RIPBase(){
         return when(transition.type){
            GUI_CLICK_BUTTON ->{
                origin = transition.originElement
-               tap("${origin?.getCentral1X()}","${origin?.getCentral1Y()}")
+               tap(origin)
                GUI_CLICK_BUTTON
            }
             SCROLL -> {
                 origin = transition.originElement
-                scroll(origin!!,true)
+                scroll(origin!!,false)
                 SCROLL
             }
             SWIPE -> {
                 origin = transition.originElement
-                scroll(origin!!, false)
+                scroll(origin!!, true)
                 return SWIPE
             }
             CONTEXT_INTERNET_OFF ->{
@@ -458,7 +485,7 @@ open class RIPBase(){
             }
             GUI_INPUT_TEXT ->{
                 origin = transition.originElement
-                tap("${origin?.getCentral1X()}","${origin?.getCentral1Y()}")
+                tap(origin)
                 val type = enterInput(origin!!)
                 if(type ==1) GUI_INPUT_TEXT else GUI_INPUT_NUMBER
             }
@@ -472,76 +499,34 @@ open class RIPBase(){
         println("NEW STATE EXPLORATION STARTED")
         currentState = State(hybrid = hybridApp, contextualChanges = contextualExploration)
         simpleTryCatch {
-            ifKeyboardHideKeyboard()
-            isEventIdle()
-            currentState?.run {
-                id = sequentialNumber
-                val rawXML = getCurrentViewHierarchy()
-                val parsedXML = loadXMLFromString(rawXML)
-                val screenShot = takeAndPullScreenshot("$id",folderName)
-                this.rawXML = rawXML
-                this.parsedXML = parsedXML
-                //Conditions for find a new state
-                rippingOutsideApp = isRippingOutSideApp(parsedXML)
-                val foundState = findStateGraph(this)
-                val sameState =  compareScreenShotWithExisting(screenShot)
-                if(foundState != null || sameState != null || rippingOutsideApp){
-                    println("State Already Exists ${
-                        if(foundState !=null){
-                            currentState = foundState
-                            Helper.deleteFile(screenShot)
-                            "Found state in graph"
-                        }else if(sameState != null){
-                            println("SAME STATE FOUND BY IMAGE COMPARISON")
-                            Helper.deleteFile(sameState.screenShot!!)
-                            val newScreen = File(screenShot)
-                            newScreen.renameTo(File(sameState.screenShot))
-                            currentState = sameState
-                            "Found state by images"
-                        }else{
-                          Helper.deleteFile(screenShot)
-                            currentState = previousState
-                            "Ripping outside the app"
-                        }
-                    }")
-                }else{
-                    //New State found
-                    val activity = getCurrentFocus()
-                    takeAndPullXMLSnapshot("${id}",folderName)
-                    println("Current ST: $id")
-                    activityName = activity
-                    statesTable?.put(rawXML,this)
-                    states?.add(this)
-                    this.screenShot =  screenShot
-                    this.retrieveContext(packageName)
-                    getNodeImagesFromState(this)
-                }
-
-                if(!rippingOutsideApp){
-                    if(hasRemainingTransition()){
-                        previousState.addPossibleTransition(executedTransition)
-                    }
-                    this.addOutboundTransition(executedTransition)
-                    previousState.addOutboundTransition(executedTransition)
-                    executedTransition.destination = this
-                    executedTransition.origin = previousState
-                    transitions?.add(executedTransition)
-                }
-                var stateTransition: Transition? = null
-                var stateChanges = false
-                while(!stateChanges and validExecution()){
+            processState(previousState,executedTransition)
+            var stateTransition: Transition? = null
+            var stateChanges = false
+            currentState?.apply{
+                while(!stateChanges && validExecution()){
                     stateTransition = popTransition()
-                    executeTransition(stateTransition)
-                    ifKeyboardHideKeyboard()
-                    executedIterations++
                     isEventIdle()
-                    stateChanges = stateChanges()
+                    stateTransition?.also{
+                        executeTransition(it)
+                        ifKeyboardHideKeyboard()
+                        executedIterations++
+                        stateChanges = stateChanges()
+                        it.valuableTransNumber = transitions?.size?.minus(1)
+                        executedTransitions?.add(it)
+                        if(isHome()){
+                            throw RipException("Execution closed the app: Currently in Home")
+                        }
+                    }
                 }
-                if(stateChanges and validExecution()){
-                    val tranScreenshot = takeTransitionScreenshot(stateTransition!!, transitions?.size!!)
-                    stateTransition.screenShot = tranScreenshot
-                    executedIterations++
-                    explore(this,stateTransition)
+                if(stateChanges && validExecution()){
+                    executedTransitions?.also{ it.removeAt(it.size.minus(1)) }
+                }
+                if(validExecution()){
+                    isEventIdle()
+                    stateTransition?.also{
+                        it.screenShot = takeTransitionScreenshot(it,transitions?.size?:-1)
+                        explore(this,it)
+                    }
                 }
             }
         }
@@ -550,22 +535,19 @@ open class RIPBase(){
     fun findStateGraph(pState: State): State? = statesTable?.get(pState.rawXML)
 
     fun ifKeyboardHideKeyboard(){
-        if(isKeyBoardOpen()) goBack()
+        simpleTryCatch {if(isKeyBoardOpen()) goBack()}
     }
     fun isRippingOutSideApp(parsedXML: Document): Boolean{
         val currentPackage = parsedXML.getElementsByTagName("node").item(0).attributes.getNamedItem("package").nodeValue
-        if(pacName == ""){
-            pacName = currentPackage
+        if(currentPackage.equals(packageName)||currentPackage.equals("com.google.android.packageinstaller")){
+            return false
         }
-        println("pacName $pacName")
-        println("packageName $packageName")
-        if(currentPackage != packageName){
-            println("Ripping outside")
-            println("Going back")
-            goBack()
-            return true
-        }
-        return false
+        println("current package: $currentPackage")
+        println("packageName: $packageName")
+        println("Ripping outside")
+        println("Going back")
+        goBack()
+        return true
     }
 
     fun loadXMLFromString(xml: String): Document{
@@ -578,7 +560,7 @@ open class RIPBase(){
 
         var obj: JSONObject? = null
         FileReader(configFilePath).use { reader ->
-            JSONParser().let {
+            JSONParser().also{
                obj = it.parse(reader) as JSONObject
                 apkLocation = obj?.get("apkPath") as String
                 folderName = obj?.get("outputFolder") as String
@@ -586,14 +568,106 @@ open class RIPBase(){
                 executionMode = obj?.get("executionMode") as String
                 with(obj?.get("executionParams") as JSONObject){
                     when(executionMode){
-                        "events" -> maxIterations = Math.toIntExact(this.get("events") as Long)
-                        "time" -> maxTime = Math.toIntExact(this.get("time") as Long)
+                        "events" -> maxIterations = Math.toIntExact(get("events") as Long)
+                        "time" -> maxTime = Math.toIntExact(get("time") as Long)
                     }
                 }
             }
         }
         return obj
     }
+
+    fun processState(previousState: State, executedTransition: Transition){
+        ifKeyboardHideKeyboard()
+        isEventIdle()
+        currentState?.apply{
+            id = sequentialNumber
+            var rawXML = getCurrentViewHierarchy()
+            rawXML = processXML(rawXML)
+            val parsedXML = loadXMLFromString(rawXML)
+            val screenShot = takeAndPullScreenshot("${currentState?.id}", folderName)
+            this.rawXML = rawXML
+            this.parsedXML = parsedXML
+
+            //Conditions to find a new state
+            rippingOutsideApp = isRippingOutSideApp(parsedXML)
+            executedTransition.leavesAppCore = rippingOutsideApp
+            executedTransition.valuableTransNumber = transitions?.size?.minus(1) ?: -10
+            executedTransitions?.add(executedTransition)
+            var sameState: State? = null
+            var foundState: State?
+            if (rippingOutsideApp) {
+                //Application is ripping outside the app
+                Helper.deleteFile(screenShot)
+                currentState = previousState
+                println("Ripping outside the app")
+                sequentialNumber--
+            } else if (findStateGraph(this).also { foundState = it } != null) {
+                //The state is already in the states' graph
+                currentState = foundState
+                Helper.deleteFile(screenShot)
+                println("State Already Exists: Found state in graph")
+                sequentialNumber--
+            } else if (compareScreenShotWithExisting(screenShot).also { sameState = it } != null) {
+                //State is already explored and it was found by image comparison
+                sameState?.also {
+                    Helper.deleteFile(it.screenShot!!)
+                    val newScreen = File(screenShot)
+                    newScreen.renameTo(File(it.screenShot))
+                    //Change the XML of the state because it could have some change and because of that it was not found in the graph
+                    it.rawXML = rawXML
+                    it.parsedXML = parsedXML
+
+                    val allNodes = it.parsedXML?.getElementsByTagName("node")
+                    val androidNodes = it.stateNodes
+                    androidNodes.forEach { androidNode ->
+                        for (i in 0 until allNodes!!.length) {
+                            val currentNode = allNodes.item(i)
+                            val auxAndroidNode = AndroidNode(it, currentNode)
+                            if (androidNode.resourceID == auxAndroidNode.resourceID
+                                && androidNode.xPath == auxAndroidNode.xPath
+                            ) {
+                                androidNode.loadAttributesFromDom(currentNode)
+                            }
+                        }
+                    }
+                    currentState = it
+                }
+                println("State Already Exists: Found state by images")
+                sequentialNumber--
+            } else if (isHome()) {
+                throw  RipException("Execution closed the app: Currently in Home")
+            } else {
+                //New State
+                println("New state found")
+                isEventIdle()
+                this.generatePossibleTransitions()
+                val activity = getCurrentFocus()
+                takeAndPullScreenshot("$id", folderName)
+                println("Current ST: $id")
+                activityName = activity
+                statesTable?.put(rawXML, this)
+                states?.add(this)
+                this.screenShot = screenShot
+                retrieveContext(packageName)
+                getNodeImagesFromState(this)
+            }
+
+            //Add out and in bound transitions to the previous state and the current one respectively
+            if(!rippingOutsideApp){
+                if(this.hasRemainingTransition()){
+                    previousState.addPossibleTransition(executedTransition)
+                }
+                executedTransition.destination = this
+                executedTransition.origin = previousState
+                this.addInboundTransition(executedTransition)
+                previousState.addOutboundTransition(executedTransition)
+                transitions?.add(executedTransition)
+            }
+        }
+    }
+
+    open fun processXML(rawXML:String): String = rawXML
 
     open fun preProcess(params2: JSONObject){
 
@@ -625,23 +699,17 @@ open class RIPBase(){
         val ty2 = tapY2.toString()
 
         try{
-            if(isSwipe){
-                scroll(tx2,ty2,tx,ty2)
-            }else{
-                scroll(tx2,ty2,tx2,ty)
-            }
+            if(!isSwipe) scroll(tx2,ty2,tx,ty2) else scroll(tx2,ty2,tx2,ty)
         }catch (e: Exception){
             println("CANNOT SCROLL")
         }
     }
 
-    private fun stateChanges(): Boolean{
-        return getCurrentViewHierarchy().let {
-            it != currentState?.rawXML
-        }
-    }
+    private fun stateChanges(): Boolean = getCurrentViewHierarchy().run{ this != currentState?.rawXML }
+
+    private fun tap(node: AndroidNode?) = tap("${node?.getCentral1X()}","${node?.getCentral1Y()}")
     private fun validExecution(): Boolean{
-        elapsedTime = System.currentTimeMillis().run { ((this-startTime)/60000).toInt()}
+        elapsedTime = System.currentTimeMillis().let { ((it-startTime)/60000).toInt()}
         return (elapsedTime<maxTime && (maxIterations-executedIterations)>0)
     }
 

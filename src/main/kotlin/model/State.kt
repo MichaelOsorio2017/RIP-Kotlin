@@ -8,8 +8,7 @@ import org.w3c.dom.Document
 import java.util.*
 import kotlin.collections.ArrayList
 
-
-data class State(var id: Int? = null, var activityName: String? = null,
+class State(var id: Int? = null, activityName: String? = "",
                  var rawXML: String? = null, var hybrid: Boolean, var contextualChanges: Boolean,
                  var battery: Int? = null, val stateNodes: MutableList<AndroidNode> = ArrayList(),
                  val possibleTransitions: Deque<Transition> = ArrayDeque(),
@@ -18,12 +17,11 @@ data class State(var id: Int? = null, var activityName: String? = null,
                  var hybridErrors: MutableList<HybridError> = ArrayList(),
                  var screenShot: String? = null, var domainModel: MutableList<Domain> = ArrayList(),
                  var wifiStatus: Boolean? = null, var cpu: Double? = null, var memory:Double? = null,
-                 var airplane: Boolean? = null) {
-    var parsedXML: Document? = null
-        set(value){
-            field = value
-            generatePossibleTransitions()
-        }
+                 var airplane: Boolean? = null, var parsedXML: Document?= null) {
+
+    //TODO Puede que este activityName sea causante de más estados de los que debería porque no los encuentra en el grafo
+    var activityName: String? = activityName
+        get() = field?.let{it.split("\r\n")[0]}?:"No activity name"
 
     fun popTransition(): Transition = possibleTransitions.pop()
 
@@ -34,7 +32,7 @@ data class State(var id: Int? = null, var activityName: String? = null,
     fun addOutboundTransition(pTransition: Transition)= outboundTransition + pTransition
 
 
-    private fun generatePossibleTransitions(){
+    fun generatePossibleTransitions(){
         possibleTransitions.push(Transition(origin = this, type = BUTTON_BACK))
         if(contextualChanges){
             listOf(1,2).forEach{
