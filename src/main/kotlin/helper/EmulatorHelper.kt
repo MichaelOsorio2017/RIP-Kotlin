@@ -1,7 +1,8 @@
 package helper.EmulatorHelper
+
 import main.kotlin.RipException
 import helper.ExternalProcess2.executeProcess2
-import helper.Helper
+import main.kotlin.helper.Helper
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStream
@@ -186,15 +187,18 @@ fun getDeviceResolution(): Int{
 
 fun isEventIdle(){
     //The original code creates a new String[]{Here the same list of strings}
-    val pBB = ProcessBuilder("adb","shell","dumsys","window","-a","|","grep","mAppTransitionState")
+    val pBB = ProcessBuilder(listOf("adb","shell","dumsys","window","-a","|","grep","mAppTransitionState"))
     var termino = false
-    var pss: Process
+
     println("waiting for emulator's event idle state")
-    var resp = ""
     while(!termino){
-        pss = pBB.start()
-        BufferedReader(InputStreamReader(pss.inputStream)).use {
-            it.forEachLine { resp += it }
+        val pss = pBB.start()
+        val reader = BufferedReader(InputStreamReader(pss.inputStream))
+        var resp = ""
+        var line = reader.readLine()
+        while(line != null){
+            resp += line
+            line = reader.readLine()
         }
         pss.waitFor()
 

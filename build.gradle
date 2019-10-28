@@ -8,7 +8,27 @@
 
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'java-library'
+apply plugin: 'kotlin'
 
+buildscript {
+    ext.kotlin_version = '1.3.50'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use jcenter for resolving your dependencies.
@@ -16,39 +36,39 @@ repositories {
     mavenCentral()
     jcenter()
 }
-    
-    task baseRIP(type: Jar) {
+
+task baseRIP(type: Jar) {
         manifest {
-            attributes "Main-Class": "main.RIPBase"
+            attributes "Main-Class": "main.kotlin.main.RIPBase"
         }
-        baseName = 'RIP'
+        baseName = 'RIP_KOTLIN'
         from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-        with jar 
+        with jar
     }
-    
+
     task ripI18N(type: Jar) {
-    manifest {
-        attributes "Main-Class": "main.RIPi18n"
-    }
-    baseName = 'RIPi18n'
+            manifest {
+            attributes "Main-Class": "main.RIPi18n"
+        }
+    baseName = 'RIPi18n_KOTLIN'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar}
-    
-    task ripRR(type: Jar) {
-    manifest {
-        attributes "Main-Class": "main.RIPRR"
+
+task ripRR(type: Jar) {
+        manifest {
+        attributes "Main-Class": "main.kotlin.main.RIPRR"
     }
-    baseName = 'RIPRR'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar}
-    
-    task ripRRi18n(type: Jar) {
-    manifest {
+        baseName = 'RIPRR_KOTLIN'
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+        with jar}
+
+task ripRRi18n(type: Jar) {
+        manifest {
         attributes "Main-Class": "main.RIPRRi18n"
     }
-    baseName = 'RIPRRi18n'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar}
+        baseName = 'RIPRRi18n_KOTLIN '
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+        with jar}
 
 
 dependencies {
@@ -64,5 +84,6 @@ dependencies {
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 

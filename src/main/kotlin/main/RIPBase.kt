@@ -1,4 +1,5 @@
 package main.kotlin.main
+
 import helper.EmulatorHelper.*
 import main.kotlin.model.State
 import main.kotlin.model.Transition
@@ -6,11 +7,12 @@ import org.json.simple.JSONObject
 import org.json.simple.parser.JSONParser
 import java.util.*
 import kotlin.collections.ArrayList
-import helper.Helper
-import helper.compareImage
-import helper.getNodeImagesFromState
-import helper.takeTransitionScreenshot
+
 import main.kotlin.RipException
+import main.kotlin.helper.Helper
+import main.kotlin.helper.compareImage
+import main.kotlin.helper.getNodeImagesFromState
+import main.kotlin.helper.takeTransitionScreenshot
 import main.kotlin.hybridResources.JSConsoleReader
 import main.kotlin.model.AndroidNode
 import main.kotlin.model.TransitionType
@@ -29,6 +31,7 @@ open class RIPBase(){
         const val STATES = "states"
         const val TRANSITIONS = "transitions"
         const val AMOUNT_STATES = "amountStates"
+
     }
     /*
     * Environment variables
@@ -713,4 +716,18 @@ open class RIPBase(){
         return (elapsedTime<maxTime && (maxIterations-executedIterations)>0)
     }
 
+}
+
+fun main(args: Array<String>){
+    if(args.isEmpty()){
+        System.err.println("Please provide config file location")
+    }else{
+        try {
+            RIPBase(args[0])
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            Helper.closeStream()
+        }
+    }
 }

@@ -1,6 +1,4 @@
 package main.kotlin.model
-import com.intellij.internal.statistic.eventLog.initStateEventTrackers
-import com.sun.jna.StringArray
 import main.kotlin.model.AndroidNodeProperty.*
 
 import org.w3c.dom.Node

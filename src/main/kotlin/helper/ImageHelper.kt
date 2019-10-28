@@ -1,6 +1,5 @@
-package helper
+package main.kotlin.helper
 
-import com.intellij.util.ui.UIUtil
 import helper.EmulatorHelper.getScreenSize
 import main.kotlin.model.State
 import main.kotlin.model.Transition
@@ -8,7 +7,6 @@ import main.kotlin.model.TransitionType
 import java.awt.*
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
-import java.awt.image.DataBuffer
 import java.io.File
 import java.lang.Exception
 import javax.imageio.ImageIO
@@ -96,8 +94,8 @@ fun takeTransitionScreenshot(stateTransition: Transition, transitionId: Int): St
         }
     }else{
         val deviceDimensions = getScreenSize()
-        val g2d = UIUtil.createImage(deviceDimensions[0],deviceDimensions[1],BufferedImage.TYPE_INT_RGB).let {
-            it.createGraphics()
+        val g2d = BufferedImage(deviceDimensions[0],deviceDimensions[1],BufferedImage.TYPE_INT_RGB).run {
+            createGraphics()
         }
         with(g2d){
             paint= Color.BLACK

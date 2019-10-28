@@ -1,13 +1,12 @@
-package helper
+package main.kotlin.helper
 
 import java.io.BufferedWriter
 import helper.EmulatorHelper.simpleTryCatch
-import main.kotlin.helper.SingletonHolder
 import java.io.File
 import java.io.FileWriter
 
-class Helper(){
-    companion object: SingletonHolder<Helper,String>({ folderName ->
+class Helper{
+    companion object: SingletonHolder<Helper, String>({ folderName ->
         simpleTryCatch { Helper.out = BufferedWriter(FileWriter("$folderName${File.separator}./log.log"))}
         Helper()
     }) {

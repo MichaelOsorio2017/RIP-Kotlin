@@ -1,9 +1,10 @@
 package main.kotlin.main
 
 import helper.EmulatorHelper.*
-import helper.Helper
-import helper.getNodeImagesFromState
-import helper.takeTransitionScreenshot
+import main.kotlin.helper.Helper
+import main.kotlin.helper.getNodeImagesFromState
+import main.kotlin.helper.takeTransitionScreenshot
+
 import main.kotlin.model.AndroidNode
 import main.kotlin.model.State
 import main.kotlin.model.Transition
@@ -184,6 +185,19 @@ class RIPRR(configFilePath: String): RIPBase(configFilePath){
                 tempTrans.screenShot = takeTransitionScreenshot(tempTrans!!, transitions!!.size)
                 explore(currentState!!,tempTrans)
             }
+        }
+    }
+}
+fun main(args: Array<String>){
+    if(args.size<1){
+        System.err.println("Please provide config file location")
+    }else{
+        try {
+            RIPRR(args[0])
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            Helper.closeStream()
         }
     }
 }
